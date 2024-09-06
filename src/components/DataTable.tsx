@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Table,
   TableBody,
@@ -7,11 +7,12 @@ import {
   TableHead,
   TableRow,
   Paper,
-  CircularProgress,
   Button,
   Box,
+  CircularProgress,
 } from "@mui/material";
 import axios from "axios";
+import { HOST } from "../config";
 import AddRecordDialog from "./AddRecordDialog";
 import EditRecordDialog from "./EditRecordDialog";
 import ConfirmDeleteDialog from "./ConfirmDeleteDialog";
@@ -33,8 +34,8 @@ const DataTable = ({ token }: { token: string }) => {
   const [data, setData] = useState<TableData[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-  const [selectedRecord, setSelectedRecord] = useState<TableData | null>(null); // Состояние для выбранной строки
-  const [selectedIndex, setSelectedIndex] = useState<number | null>(null); // Индекс выбранной строки для навигации с клавиатуры
+  const [selectedRecord, setSelectedRecord] = useState<TableData | null>(null);
+  const [selectedIndex, setSelectedIndex] = useState<number | null>(null); // Добавляем индекс выбранной строки
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isConfirmDeleteDialogOpen, setIsConfirmDeleteDialogOpen] =
@@ -46,7 +47,7 @@ const DataTable = ({ token }: { token: string }) => {
     setLoading(true);
     try {
       const response = await axios.get(
-        "https://test.v5.pryaniky.com/ru/data/v3/testmethods/docs/userdocs/get",
+        `${HOST}/ru/data/v3/testmethods/docs/userdocs/get`,
         {
           headers: { "x-auth": token },
         }
@@ -90,15 +91,11 @@ const DataTable = ({ token }: { token: string }) => {
         return newIndex;
       });
     } else if (event.key === "Enter" && selectedIndex !== null) {
-      setSelectedRecord(data[selectedIndex]);
+      setIsEditDialogOpen(true);
     } else if (event.key === "Escape") {
       setSelectedRecord(null);
       setSelectedIndex(null);
     }
-  };
-  const handleOutsideClick = () => {
-    setSelectedRecord(null);
-    setSelectedIndex(null);
   };
 
   const handleOpenDeleteDialog = () => {
@@ -116,7 +113,7 @@ const DataTable = ({ token }: { token: string }) => {
 
     try {
       await axios.post(
-        `https://test.v5.pryaniky.com/ru/data/v3/testmethods/docs/userdocs/delete/${selectedRecord.id}`,
+        `${HOST}/ru/data/v3/testmethods/docs/userdocs/delete/${selectedRecord.id}`,
         {},
         {
           headers: { "x-auth": token },
@@ -134,16 +131,6 @@ const DataTable = ({ token }: { token: string }) => {
     }
   };
 
-  const handleAddRecord = () => {
-    setIsAddDialogOpen(true);
-  };
-
-  const handleEditRecord = () => {
-    if (selectedRecord) {
-      setIsEditDialogOpen(true);
-    }
-  };
-
   const handleRecordUpdated = () => {
     setSnackbarMessage("Запись обновлена успешно");
     setSnackbarOpen(true);
@@ -154,88 +141,84 @@ const DataTable = ({ token }: { token: string }) => {
     setSnackbarOpen(false);
   };
 
-  if (loading) {
-    return <CircularProgress />;
-  }
-
-  if (error) {
-    return <p>{error}</p>;
-  }
-
   return (
     <div
-      onKeyDown={handleKeyDown}
-      onClick={handleOutsideClick}
-      tabIndex={0}
+      onKeyDown={handleKeyDown} // Добавляем обработку клавиш
+      tabIndex={0} // Чтобы элемент мог фокусироваться
       style={{ outline: "none" }}
     >
-      <Box
-        sx={{ mb: 2 }}
-        onClick={e => e.stopPropagation()}
-      >
-        {" "}
-        <Button
-          variant='contained'
-          color='primary'
-          onClick={handleAddRecord}
-          sx={{ mr: 1 }}
-        >
-          Добавить запись
-        </Button>
-        <Button
-          variant='contained'
-          color='secondary'
-          onClick={handleEditRecord}
-          disabled={!selectedRecord}
-          sx={{ mr: 1 }}
-        >
-          Редактировать
-        </Button>
-        <Button
-          variant='contained'
-          color='error'
-          onClick={handleOpenDeleteDialog}
-          disabled={!selectedRecord}
-        >
-          Удалить
-        </Button>
-      </Box>
+      {loading && <CircularProgress />}
+      {error && <p>{error}</p>}
+      {!loading && !error && (
+        <>
+          <Box
+            sx={{ mb: 2 }}
+            onClick={e => e.stopPropagation()}
+          >
+            <Button
+              variant='contained'
+              color='primary'
+              onClick={() => setIsAddDialogOpen(true)}
+              sx={{ mr: 1 }}
+            >
+              Добавить запись
+            </Button>
+            <Button
+              variant='contained'
+              color='secondary'
+              onClick={() => setIsEditDialogOpen(true)}
+              disabled={!selectedRecord}
+              sx={{ mr: 1 }}
+            >
+              Редактировать
+            </Button>
+            <Button
+              variant='contained'
+              color='error'
+              onClick={handleOpenDeleteDialog}
+              disabled={!selectedRecord}
+            >
+              Удалить
+            </Button>
+          </Box>
 
-      <TableContainer component={Paper}>
-        <Table>
-          <TableHead>
-            <TableRow>
-              <TableCell>Company Signature Date</TableCell>
-              <TableCell>Company Signature Name</TableCell>
-              <TableCell>Document Name</TableCell>
-              <TableCell>Document Status</TableCell>
-              <TableCell>Document Type</TableCell>
-              <TableCell>Employee Number</TableCell>
-              <TableCell>Employee Signature Date</TableCell>
-              <TableCell>Employee Signature Name</TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {data.map((row, index) => (
-              <TableRow
-                key={row.id}
-                onClick={event => handleRowClick(event, row, index)}
-                selected={selectedRecord?.id === row.id}
-                hover
-              >
-                <TableCell>{row.companySigDate}</TableCell>
-                <TableCell>{row.companySignatureName}</TableCell>
-                <TableCell>{row.documentName}</TableCell>
-                <TableCell>{row.documentStatus}</TableCell>
-                <TableCell>{row.documentType}</TableCell>
-                <TableCell>{row.employeeNumber}</TableCell>
-                <TableCell>{row.employeeSigDate}</TableCell>
-                <TableCell>{row.employeeSignatureName}</TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </TableContainer>
+          <TableContainer component={Paper}>
+            <Table>
+              <TableHead>
+                <TableRow>
+                  <TableCell>Company Signature Date</TableCell>
+                  <TableCell>Company Signature Name</TableCell>
+                  <TableCell>Document Name</TableCell>
+                  <TableCell>Document Status</TableCell>
+                  <TableCell>Document Type</TableCell>
+                  <TableCell>Employee Number</TableCell>
+                  <TableCell>Employee Signature Date</TableCell>
+                  <TableCell>Employee Signature Name</TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {data.map((row, index) => (
+                  <TableRow
+                    key={row.id}
+                    onClick={event => handleRowClick(event, row, index)}
+                    selected={selectedRecord?.id === row.id}
+                    hover
+                  >
+                    <TableCell>{row.companySigDate}</TableCell>
+                    <TableCell>{row.companySignatureName}</TableCell>
+                    <TableCell>{row.documentName}</TableCell>
+                    <TableCell>{row.documentStatus}</TableCell>
+                    <TableCell>{row.documentType}</TableCell>
+                    <TableCell>{row.employeeNumber}</TableCell>
+                    <TableCell>{row.employeeSigDate}</TableCell>
+                    <TableCell>{row.employeeSignatureName}</TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </TableContainer>
+        </>
+      )}
 
       <AddRecordDialog
         open={isAddDialogOpen}
@@ -248,7 +231,7 @@ const DataTable = ({ token }: { token: string }) => {
         open={isEditDialogOpen}
         handleClose={() => setIsEditDialogOpen(false)}
         token={token}
-        record={selectedRecord}
+        record={selectedRecord} // Передаем выбранную запись в диалог
         onRecordUpdated={handleRecordUpdated}
       />
 

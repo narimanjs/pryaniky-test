@@ -6,8 +6,11 @@ import {
   DialogActions,
   DialogContent,
   DialogTitle,
+  CircularProgress,
+  Typography,
 } from "@mui/material";
 import axios from "axios";
+import { HOST } from "../config";
 
 interface AddRecordDialogProps {
   open: boolean;
@@ -33,6 +36,9 @@ const AddRecordDialog: React.FC<AddRecordDialogProps> = ({
     employeeSignatureName: "",
   });
 
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({
       ...formData,
@@ -41,16 +47,21 @@ const AddRecordDialog: React.FC<AddRecordDialogProps> = ({
   };
 
   const handleAddRecord = async () => {
+    setLoading(true);
+    setError(null);
     try {
       await axios.post(
-        "https://test.v5.pryaniky.com/ru/data/v3/testmethods/docs/userdocs/create",
+        `${HOST}/ru/data/v3/testmethods/docs/userdocs/create`,
         formData,
         { headers: { "x-auth": token } }
       );
       onRecordAdded();
       handleClose(); // Закрыть модальное окно после успешного добавления
-    } catch (error) {
-      console.error("Ошибка при добавлении записи:", error);
+    } catch (err) {
+      setError("Ошибка при добавлении записи. Попробуйте еще раз.");
+      console.error("Ошибка при добавлении записи:", err);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -129,19 +140,30 @@ const AddRecordDialog: React.FC<AddRecordDialogProps> = ({
           fullWidth
           margin='dense'
         />
+        {error && (
+          <Typography
+            color='error'
+            variant='body2'
+            sx={{ mt: 2 }}
+          >
+            {error}
+          </Typography>
+        )}
       </DialogContent>
       <DialogActions>
         <Button
           onClick={handleClose}
           color='primary'
+          disabled={loading}
         >
           Отмена
         </Button>
         <Button
           onClick={handleAddRecord}
           color='primary'
+          disabled={loading}
         >
-          Добавить
+          {loading ? <CircularProgress size={24} /> : "Добавить"}
         </Button>
       </DialogActions>
     </Dialog>

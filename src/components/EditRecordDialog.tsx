@@ -8,8 +8,8 @@ import {
   DialogTitle,
 } from "@mui/material";
 import axios from "axios";
+import { HOST } from "../config";
 
-// Определяем тип данных для записи в таблице
 interface TableData {
   id: string;
   companySigDate: string;
@@ -48,23 +48,21 @@ const EditRecordDialog: React.FC<EditRecordDialogProps> = ({
     employeeSignatureName: "",
   });
 
-  // Обновляем форму при изменении переданных данных записи
   useEffect(() => {
     if (record) {
       setFormData({
-        companySigDate: record.companySigDate,
+        companySigDate: record.companySigDate.split("T")[0],
         companySignatureName: record.companySignatureName,
         documentName: record.documentName,
         documentStatus: record.documentStatus,
         documentType: record.documentType,
         employeeNumber: record.employeeNumber,
-        employeeSigDate: record.employeeSigDate,
+        employeeSigDate: record.employeeSigDate.split("T")[0],
         employeeSignatureName: record.employeeSignatureName,
       });
     }
   }, [record]);
 
-  // Обработка изменения в полях формы
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({
       ...formData,
@@ -72,16 +70,25 @@ const EditRecordDialog: React.FC<EditRecordDialogProps> = ({
     });
   };
 
-  // Отправка данных на сервер для обновления записи
   const handleUpdateRecord = async () => {
+    if (!record?.id) {
+      console.error("ID записи отсутствует:", record);
+      return;
+    }
+
     try {
-      await axios.post(
-        `https://test.v5.pryaniky.com/ru/data/v3/testmethods/docs/userdocs/set/${record?.id}`,
+      const response = await axios.post(
+        `${HOST}/ru/data/v3/testmethods/docs/userdocs/set/${record.id}`,
         formData,
         { headers: { "x-auth": token } }
       );
-      onRecordUpdated(); // Обновляем данные в таблице после успешного редактирования
-      handleClose(); // Закрываем модальное окно
+
+      if (response.data.error_code === 0) {
+        onRecordUpdated();
+        handleClose();
+      } else {
+        console.error("Ошибка на сервере:", response.data);
+      }
     } catch (error) {
       console.error("Ошибка при обновлении записи:", error);
     }

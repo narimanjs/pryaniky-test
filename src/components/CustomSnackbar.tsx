@@ -2,9 +2,9 @@ import React from "react";
 import { Snackbar, Alert } from "@mui/material";
 
 interface SnackbarProps {
-  snackbarOpen: boolean; // Открытое ли уведомление
-  snackbarMessage: string; // Сообщение для показа
-  handleCloseSnackbar: () => void; // Функция для закрытия уведомления
+  snackbarOpen: boolean;
+  snackbarMessage: string;
+  handleCloseSnackbar: () => void;
 }
 
 const CustomSnackbar: React.FC<SnackbarProps> = ({
