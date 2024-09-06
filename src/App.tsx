@@ -11,18 +11,17 @@ import {
 } from "@mui/material";
 import Login from "./components/Login";
 import DataTable from "./components/DataTable";
-import UserInfo from "./components/UserInfo"; // Импортируем компонент
+import UserInfo from "./components/UserInfo";
 
 const App = () => {
   const [token, setToken] = useState<string | null>(
     localStorage.getItem("token")
-  ); // Инициализируем токен из localStorage
+  );
   const [username, setUsername] = useState<string | null>(
     localStorage.getItem("username")
-  ); // Инициализируем username из localStorage
-  const [logoutDialogOpen, setLogoutDialogOpen] = useState(false); // Состояние для диалога
+  );
+  const [logoutDialogOpen, setLogoutDialogOpen] = useState(false);
 
-  // Обработчик успешного логина
   const handleLogin = (newToken: string, newUsername: string) => {
     setToken(newToken);
     setUsername(newUsername);
