@@ -50,7 +50,7 @@ const App = () => {
   }
 
   return (
-    <Container maxWidth='lg'>
+    <Container maxWidth='xl'>
       <Paper
         elevation={3}
         sx={{ padding: 4, marginTop: 8 }}

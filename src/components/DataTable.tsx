@@ -1,16 +1,5 @@
-import React, { useState, useEffect } from "react";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  Paper,
-  Button,
-  Box,
-  CircularProgress,
-} from "@mui/material";
+import React, { useState, useEffect, useRef } from "react";
+import { Button, Box, CircularProgress } from "@mui/material";
 import { Add, Delete, Edit } from "@mui/icons-material";
 import axios from "axios";
 import { HOST } from "../config";
@@ -18,6 +7,10 @@ import AddRecordDialog from "./AddRecordDialog";
 import EditRecordDialog from "./EditRecordDialog";
 import ConfirmDeleteDialog from "./ConfirmDeleteDialog";
 import CustomSnackbar from "./CustomSnackbar";
+import { AgGridReact } from "ag-grid-react";
+import { ColDef, GridApi } from "ag-grid-community";
+import "ag-grid-community/styles/ag-grid.css";
+import "ag-grid-community/styles/ag-theme-alpine.css";
 
 interface TableData {
   id: string;
@@ -36,13 +29,42 @@ const DataTable = ({ token }: { token: string }) => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [selectedRecord, setSelectedRecord] = useState<TableData | null>(null);
-  const [selectedIndex, setSelectedIndex] = useState<number | null>(null); // Добавляем индекс выбранной строки
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isConfirmDeleteDialogOpen, setIsConfirmDeleteDialogOpen] =
     useState(false);
   const [snackbarOpen, setSnackbarOpen] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState("");
+
+  const gridRef = useRef<AgGridReact>(null);
+  const [gridApi, setGridApi] = useState<GridApi | null>(null); // Храним ссылку на Grid API
+
+  const [columnDefs] = useState<ColDef[]>([
+    {
+      field: "companySigDate",
+      headerName: "Company Signature Date",
+      width: 200,
+    },
+    {
+      field: "companySignatureName",
+      headerName: "Company Signature Name",
+      width: 200,
+    },
+    { field: "documentName", headerName: "Document Name", width: 150 },
+    { field: "documentStatus", headerName: "Document Status", width: 150 },
+    { field: "documentType", headerName: "Document Type", width: 200 },
+    { field: "employeeNumber", headerName: "Employee Number", width: 150 },
+    {
+      field: "employeeSigDate",
+      headerName: "Employee Signature Date",
+      width: 200,
+    },
+    {
+      field: "employeeSignatureName",
+      headerName: "Employee Signature Name",
+      width: 150,
+    },
+  ]);
 
   const fetchData = async () => {
     setLoading(true);
@@ -65,48 +87,14 @@ const DataTable = ({ token }: { token: string }) => {
     fetchData();
   }, [token]);
 
-  const handleRowClick = (
-    event: React.MouseEvent,
-    record: TableData,
-    index: number
-  ) => {
-    event.stopPropagation();
-    setSelectedRecord(record);
-    setSelectedIndex(index);
-  };
-
-  const handleKeyDown = (event: React.KeyboardEvent<HTMLDivElement>) => {
-    if (data.length === 0) return;
-
-    if (event.key === "ArrowDown") {
-      setSelectedIndex(prevIndex => {
-        const newIndex =
-          prevIndex !== null ? Math.min(prevIndex + 1, data.length - 1) : 0;
-        setSelectedRecord(data[newIndex]);
-        return newIndex;
-      });
-    } else if (event.key === "ArrowUp") {
-      setSelectedIndex(prevIndex => {
-        const newIndex = prevIndex !== null ? Math.max(prevIndex - 1, 0) : 0;
-        setSelectedRecord(data[newIndex]);
-        return newIndex;
-      });
-    } else if (event.key === "Enter" && selectedIndex !== null) {
-      setIsEditDialogOpen(true);
-    } else if (event.key === "Escape") {
-      setSelectedRecord(null);
-      setSelectedIndex(null);
-    }
+  const handleRowClick = (params: any) => {
+    setSelectedRecord(params.data);
   };
 
   const handleOpenDeleteDialog = () => {
     if (selectedRecord) {
       setIsConfirmDeleteDialogOpen(true);
     }
-  };
-
-  const handleCloseDeleteDialog = () => {
-    setIsConfirmDeleteDialogOpen(false);
   };
 
   const handleConfirmDelete = async () => {
@@ -127,7 +115,7 @@ const DataTable = ({ token }: { token: string }) => {
       setSnackbarMessage("Ошибка при удалении записи");
       setSnackbarOpen(true);
     } finally {
-      handleCloseDeleteDialog();
+      setIsConfirmDeleteDialogOpen(false);
       setSelectedRecord(null);
     }
   };
@@ -142,20 +130,47 @@ const DataTable = ({ token }: { token: string }) => {
     setSnackbarOpen(false);
   };
 
+  const handleKeyDown = (event: React.KeyboardEvent) => {
+    if (!gridApi) return;
+
+    const selectedNodes = gridApi.getSelectedNodes();
+    const selectedIndex =
+      selectedNodes.length > 0 ? selectedNodes[0].rowIndex : null;
+
+    if (selectedIndex !== null) {
+      // Проверка на null
+      if (event.key === "ArrowDown") {
+        const nextIndex = selectedIndex + 1;
+        gridApi.setFocusedCell(nextIndex, "companySigDate");
+        gridApi.getRowNode(`${nextIndex}`)?.setSelected(true);
+      } else if (event.key === "ArrowUp") {
+        const prevIndex = Math.max(0, selectedIndex - 1);
+        gridApi.setFocusedCell(prevIndex, "companySigDate");
+        gridApi.getRowNode(`${prevIndex}`)?.setSelected(true);
+      } else if (event.key === "Escape") {
+        gridApi.deselectAll();
+        setSelectedRecord(null);
+      }
+    } else {
+      if (event.key === "ArrowDown") {
+        gridApi.setFocusedCell(0, "companySigDate");
+        gridApi.getRowNode("0")?.setSelected(true);
+      }
+    }
+  };
+
   return (
     <div
+      className='ag-theme-alpine'
+      style={{ height: 500, width: "100%" }}
       onKeyDown={handleKeyDown}
       tabIndex={0}
-      style={{ outline: "none" }}
     >
       {loading && <CircularProgress />}
       {error && <p>{error}</p>}
       {!loading && !error && (
         <>
-          <Box
-            sx={{ mb: 2 }}
-            onClick={e => e.stopPropagation()}
-          >
+          <Box sx={{ mb: 2 }}>
             <Button
               variant='contained'
               color='primary'
@@ -186,70 +201,44 @@ const DataTable = ({ token }: { token: string }) => {
             </Button>
           </Box>
 
-          <TableContainer component={Paper}>
-            <Table>
-              <TableHead>
-                <TableRow>
-                  <TableCell>Company Signature Date</TableCell>
-                  <TableCell>Company Signature Name</TableCell>
-                  <TableCell>Document Name</TableCell>
-                  <TableCell>Document Status</TableCell>
-                  <TableCell>Document Type</TableCell>
-                  <TableCell>Employee Number</TableCell>
-                  <TableCell>Employee Signature Date</TableCell>
-                  <TableCell>Employee Signature Name</TableCell>
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                {data.map((row, index) => (
-                  <TableRow
-                    key={row.id}
-                    onClick={event => handleRowClick(event, row, index)}
-                    selected={selectedRecord?.id === row.id}
-                    hover
-                  >
-                    <TableCell>{row.companySigDate}</TableCell>
-                    <TableCell>{row.companySignatureName}</TableCell>
-                    <TableCell>{row.documentName}</TableCell>
-                    <TableCell>{row.documentStatus}</TableCell>
-                    <TableCell>{row.documentType}</TableCell>
-                    <TableCell>{row.employeeNumber}</TableCell>
-                    <TableCell>{row.employeeSigDate}</TableCell>
-                    <TableCell>{row.employeeSignatureName}</TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </TableContainer>
+          <AgGridReact
+            ref={gridRef}
+            rowData={data}
+            columnDefs={columnDefs}
+            onRowClicked={handleRowClick}
+            onGridReady={params => setGridApi(params.api)}
+            rowSelection='single'
+            domLayout='autoHeight'
+          />
+
+          <AddRecordDialog
+            open={isAddDialogOpen}
+            handleClose={() => setIsAddDialogOpen(false)}
+            token={token}
+            onRecordAdded={handleRecordUpdated}
+          />
+
+          <EditRecordDialog
+            open={isEditDialogOpen}
+            handleClose={() => setIsEditDialogOpen(false)}
+            token={token}
+            record={selectedRecord}
+            onRecordUpdated={handleRecordUpdated}
+          />
+
+          <ConfirmDeleteDialog
+            open={isConfirmDeleteDialogOpen}
+            handleClose={() => setIsConfirmDeleteDialogOpen(false)}
+            handleConfirm={handleConfirmDelete}
+          />
+
+          <CustomSnackbar
+            snackbarOpen={snackbarOpen}
+            snackbarMessage={snackbarMessage}
+            handleCloseSnackbar={handleCloseSnackbar}
+          />
         </>
       )}
-
-      <AddRecordDialog
-        open={isAddDialogOpen}
-        handleClose={() => setIsAddDialogOpen(false)}
-        token={token}
-        onRecordAdded={handleRecordUpdated}
-      />
-
-      <EditRecordDialog
-        open={isEditDialogOpen}
-        handleClose={() => setIsEditDialogOpen(false)}
-        token={token}
-        record={selectedRecord}
-        onRecordUpdated={handleRecordUpdated}
-      />
-
-      <ConfirmDeleteDialog
-        open={isConfirmDeleteDialogOpen}
-        handleClose={handleCloseDeleteDialog}
-        handleConfirm={handleConfirmDelete}
-      />
-
-      <CustomSnackbar
-        snackbarOpen={snackbarOpen}
-        snackbarMessage={snackbarMessage}
-        handleCloseSnackbar={handleCloseSnackbar}
-      />
     </div>
   );
 };

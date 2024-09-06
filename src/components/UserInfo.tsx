@@ -36,10 +36,10 @@ const UserInfo: React.FC<UserInfoProps> = ({ username, onLogout }) => {
 
       <Button
         variant='outlined'
-        color='secondary'
+        color='error'
         onClick={onLogout}
         startIcon={<LogoutIcon />}
-        sx={{ fontSize: "1rem" }}
+        sx={{ fontSize: "1rem", width: "132px" }}
       >
         Выйти
       </Button>
