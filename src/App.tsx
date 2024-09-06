@@ -1,5 +1,4 @@
-// App.tsx
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Container,
   Paper,
@@ -12,20 +11,23 @@ import {
 } from "@mui/material";
 import Login from "./components/Login";
 import DataTable from "./components/DataTable";
-import UserInfo from "./components/UserInfo"; // Импортируем новый компонент
+import UserInfo from "./components/UserInfo"; // Импортируем компонент
 
 const App = () => {
   const [token, setToken] = useState<string | null>(
     localStorage.getItem("token")
-  );
-  const [username, setUsername] = useState<string | null>(null); // Логин пользователя
+  ); // Инициализируем токен из localStorage
+  const [username, setUsername] = useState<string | null>(
+    localStorage.getItem("username")
+  ); // Инициализируем username из localStorage
   const [logoutDialogOpen, setLogoutDialogOpen] = useState(false); // Состояние для диалога
 
+  // Обработчик успешного логина
   const handleLogin = (newToken: string, newUsername: string) => {
     setToken(newToken);
-    setUsername(newUsername); // Сохраняем логин пользователя
+    setUsername(newUsername);
     localStorage.setItem("token", newToken);
-    localStorage.setItem("username", newUsername); // Сохраняем логин в localStorage (если нужно)
+    localStorage.setItem("username", newUsername);
   };
 
   const handleLogout = () => {
@@ -33,18 +35,17 @@ const App = () => {
     setUsername(null);
     localStorage.removeItem("token");
     localStorage.removeItem("username");
-    setLogoutDialogOpen(false); // Закрываем диалог после выхода
+    setLogoutDialogOpen(false);
   };
 
   const handleOpenLogoutDialog = () => {
-    setLogoutDialogOpen(true); // Открыть диалог
+    setLogoutDialogOpen(true);
   };
 
   const handleCloseLogoutDialog = () => {
-    setLogoutDialogOpen(false); // Закрыть диалог без выхода
+    setLogoutDialogOpen(false);
   };
 
-  // Проверяем наличие токена и имени пользователя
   if (!token || !username) {
     return <Login onLogin={handleLogin} />;
   }
@@ -55,14 +56,13 @@ const App = () => {
         elevation={3}
         sx={{ padding: 4, marginTop: 8 }}
       >
-        {/* Используем компонент UserInfo */}
         <UserInfo
           username={username}
           onLogout={handleOpenLogoutDialog}
-        />{" "}
-        {/* Открываем диалог при клике на "Выйти" */}
+        />
+
         <DataTable token={token} />
-        {/* Диалог подтверждения выхода */}
+
         <Dialog
           open={logoutDialogOpen}
           onClose={handleCloseLogoutDialog}
