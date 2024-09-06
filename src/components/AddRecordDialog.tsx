@@ -46,13 +46,27 @@ const AddRecordDialog: React.FC<AddRecordDialogProps> = ({
     });
   };
 
+  // Преобразование даты в формат ISO
+  const formatToISOString = (date: string) => {
+    const isoDate = new Date(date).toISOString();
+    return isoDate;
+  };
+
   const handleAddRecord = async () => {
     setLoading(true);
     setError(null);
+
+    // Преобразование дат в ISO формат перед отправкой
+    const newRecord = {
+      ...formData,
+      companySigDate: formatToISOString(formData.companySigDate),
+      employeeSigDate: formatToISOString(formData.employeeSigDate),
+    };
+
     try {
       await axios.post(
         `${HOST}/ru/data/v3/testmethods/docs/userdocs/create`,
-        formData,
+        newRecord,
         { headers: { "x-auth": token } }
       );
       onRecordAdded();
@@ -74,7 +88,7 @@ const AddRecordDialog: React.FC<AddRecordDialogProps> = ({
       <DialogContent>
         <TextField
           label='Company Signature Date'
-          type='date'
+          type='datetime-local' // Изменено на datetime-local для выбора даты и времени
           name='companySigDate'
           value={formData.companySigDate}
           onChange={handleChange}
@@ -124,7 +138,7 @@ const AddRecordDialog: React.FC<AddRecordDialogProps> = ({
         />
         <TextField
           label='Employee Signature Date'
-          type='date'
+          type='datetime-local' // Изменено на datetime-local для выбора даты и времени
           name='employeeSigDate'
           value={formData.employeeSigDate}
           onChange={handleChange}

@@ -9,12 +9,16 @@ import {
   Paper,
 } from "@mui/material";
 import axios from "axios";
+import { HOST } from "../config";
 
-const Login = ({ onLogin }: { onLogin: (token: string) => void }) => {
-  const [username, setUsername] = useState("");
-  const [password, setPassword] = useState("password"); // Пароль фиксированный
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
+interface LoginProps {
+  onLogin: (token: string, username: string) => void;
+}
+const Login: React.FC<LoginProps> = ({ onLogin }) => {
+  const [username, setUsername] = useState<string>("");
+  const [password, setPassword] = useState<string>("password");
+  const [loading, setLoading] = useState<boolean>(false);
+  const [error, setError] = useState<string | null>(null);
 
   const validateUsername = (username: string) => {
     const regex = /^user\d+$/; // Регулярное выражение для проверки формата user{N}
@@ -31,7 +35,7 @@ const Login = ({ onLogin }: { onLogin: (token: string) => void }) => {
     setError("");
     try {
       const response = await axios.post(
-        "https://test.v5.pryaniky.com/ru/data/v3/testmethods/docs/login",
+        `${HOST}/ru/data/v3/testmethods/docs/login`,
         {
           username,
           password,
@@ -39,7 +43,7 @@ const Login = ({ onLogin }: { onLogin: (token: string) => void }) => {
       );
       const token = response.data.data.token;
       localStorage.setItem("token", token);
-      onLogin(token);
+      onLogin(token, username);
     } catch (err) {
       setError("Ошибка авторизации. Проверьте логин и пароль.");
     } finally {

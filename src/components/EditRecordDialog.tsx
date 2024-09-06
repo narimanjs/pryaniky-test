@@ -51,13 +51,13 @@ const EditRecordDialog: React.FC<EditRecordDialogProps> = ({
   useEffect(() => {
     if (record) {
       setFormData({
-        companySigDate: record.companySigDate.split("T")[0],
+        companySigDate: record.companySigDate.split(".")[0], // Убираем миллисекунды
         companySignatureName: record.companySignatureName,
         documentName: record.documentName,
         documentStatus: record.documentStatus,
         documentType: record.documentType,
         employeeNumber: record.employeeNumber,
-        employeeSigDate: record.employeeSigDate.split("T")[0],
+        employeeSigDate: record.employeeSigDate.split(".")[0], // Убираем миллисекунды
         employeeSignatureName: record.employeeSignatureName,
       });
     }
@@ -70,16 +70,27 @@ const EditRecordDialog: React.FC<EditRecordDialogProps> = ({
     });
   };
 
+  // Преобразование дат в формат ISO перед отправкой
+  const formatToISOString = (date: string) => {
+    return new Date(date).toISOString();
+  };
+
   const handleUpdateRecord = async () => {
     if (!record?.id) {
       console.error("ID записи отсутствует:", record);
       return;
     }
 
+    const updatedData = {
+      ...formData,
+      companySigDate: formatToISOString(formData.companySigDate),
+      employeeSigDate: formatToISOString(formData.employeeSigDate),
+    };
+
     try {
       const response = await axios.post(
         `${HOST}/ru/data/v3/testmethods/docs/userdocs/set/${record.id}`,
-        formData,
+        updatedData,
         { headers: { "x-auth": token } }
       );
 
@@ -103,7 +114,7 @@ const EditRecordDialog: React.FC<EditRecordDialogProps> = ({
       <DialogContent>
         <TextField
           label='Company Signature Date'
-          type='date'
+          type='datetime-local' // Изменено на datetime-local для выбора даты и времени
           name='companySigDate'
           value={formData.companySigDate}
           onChange={handleChange}
@@ -153,7 +164,7 @@ const EditRecordDialog: React.FC<EditRecordDialogProps> = ({
         />
         <TextField
           label='Employee Signature Date'
-          type='date'
+          type='datetime-local' // Изменено на datetime-local для выбора даты и времени
           name='employeeSigDate'
           value={formData.employeeSigDate}
           onChange={handleChange}

@@ -11,6 +11,7 @@ import {
   Box,
   CircularProgress,
 } from "@mui/material";
+import { Add, Delete, Edit } from "@mui/icons-material";
 import axios from "axios";
 import { HOST } from "../config";
 import AddRecordDialog from "./AddRecordDialog";
@@ -143,8 +144,8 @@ const DataTable = ({ token }: { token: string }) => {
 
   return (
     <div
-      onKeyDown={handleKeyDown} // Добавляем обработку клавиш
-      tabIndex={0} // Чтобы элемент мог фокусироваться
+      onKeyDown={handleKeyDown}
+      tabIndex={0}
       style={{ outline: "none" }}
     >
       {loading && <CircularProgress />}
@@ -160,15 +161,17 @@ const DataTable = ({ token }: { token: string }) => {
               color='primary'
               onClick={() => setIsAddDialogOpen(true)}
               sx={{ mr: 1 }}
+              startIcon={<Add />}
             >
               Добавить запись
             </Button>
             <Button
               variant='contained'
-              color='secondary'
+              color='info'
               onClick={() => setIsEditDialogOpen(true)}
               disabled={!selectedRecord}
               sx={{ mr: 1 }}
+              startIcon={<Edit />}
             >
               Редактировать
             </Button>
@@ -177,6 +180,7 @@ const DataTable = ({ token }: { token: string }) => {
               color='error'
               onClick={handleOpenDeleteDialog}
               disabled={!selectedRecord}
+              startIcon={<Delete />}
             >
               Удалить
             </Button>
@@ -231,7 +235,7 @@ const DataTable = ({ token }: { token: string }) => {
         open={isEditDialogOpen}
         handleClose={() => setIsEditDialogOpen(false)}
         token={token}
-        record={selectedRecord} // Передаем выбранную запись в диалог
+        record={selectedRecord}
         onRecordUpdated={handleRecordUpdated}
       />
 

@@ -1,8 +1,6 @@
+// App.tsx
 import React, { useState } from "react";
 import {
-  Box,
-  Typography,
-  Button,
   Container,
   Paper,
   Dialog,
@@ -10,36 +8,44 @@ import {
   DialogContent,
   DialogContentText,
   DialogTitle,
+  Button,
 } from "@mui/material";
 import Login from "./components/Login";
 import DataTable from "./components/DataTable";
+import UserInfo from "./components/UserInfo"; // Импортируем новый компонент
 
 const App = () => {
   const [token, setToken] = useState<string | null>(
     localStorage.getItem("token")
   );
-  const [logoutDialogOpen, setLogoutDialogOpen] = useState(false);
+  const [username, setUsername] = useState<string | null>(null); // Логин пользователя
+  const [logoutDialogOpen, setLogoutDialogOpen] = useState(false); // Состояние для диалога
 
-  const handleLogin = (newToken: string) => {
+  const handleLogin = (newToken: string, newUsername: string) => {
     setToken(newToken);
+    setUsername(newUsername); // Сохраняем логин пользователя
     localStorage.setItem("token", newToken);
+    localStorage.setItem("username", newUsername); // Сохраняем логин в localStorage (если нужно)
   };
 
   const handleLogout = () => {
     setToken(null);
+    setUsername(null);
     localStorage.removeItem("token");
-    setLogoutDialogOpen(false);
+    localStorage.removeItem("username");
+    setLogoutDialogOpen(false); // Закрываем диалог после выхода
   };
 
-  const handleLogoutDialogOpen = () => {
-    setLogoutDialogOpen(true);
+  const handleOpenLogoutDialog = () => {
+    setLogoutDialogOpen(true); // Открыть диалог
   };
 
-  const handleLogoutDialogClose = () => {
-    setLogoutDialogOpen(false);
+  const handleCloseLogoutDialog = () => {
+    setLogoutDialogOpen(false); // Закрыть диалог без выхода
   };
 
-  if (!token) {
+  // Проверяем наличие токена и имени пользователя
+  if (!token || !username) {
     return <Login onLogin={handleLogin} />;
   }
 
@@ -49,40 +55,31 @@ const App = () => {
         elevation={3}
         sx={{ padding: 4, marginTop: 8 }}
       >
-        <Box textAlign='center'>
-          <Typography
-            variant='h4'
-            mb={2}
-          >
-            Добро пожаловать!
-          </Typography>
-          <Button
-            variant='contained'
-            color='secondary'
-            onClick={handleLogoutDialogOpen}
-            sx={{ my: 2, mx: 4 }}
-          >
-            Выйти
-          </Button>
-        </Box>
+        {/* Используем компонент UserInfo */}
+        <UserInfo
+          username={username}
+          onLogout={handleOpenLogoutDialog}
+        />{" "}
+        {/* Открываем диалог при клике на "Выйти" */}
         <DataTable token={token} />
-
+        {/* Диалог подтверждения выхода */}
         <Dialog
           open={logoutDialogOpen}
-          onClose={handleLogoutDialogClose}
+          onClose={handleCloseLogoutDialog}
           aria-labelledby='logout-dialog-title'
+          aria-describedby='logout-dialog-description'
         >
           <DialogTitle id='logout-dialog-title'>
             Подтверждение выхода
           </DialogTitle>
           <DialogContent>
-            <DialogContentText>
-              Вы действительно хотите выйти?
+            <DialogContentText id='logout-dialog-description'>
+              Вы уверены, что хотите выйти из системы?
             </DialogContentText>
           </DialogContent>
           <DialogActions>
             <Button
-              onClick={handleLogoutDialogClose}
+              onClick={handleCloseLogoutDialog}
               color='primary'
             >
               Отмена
