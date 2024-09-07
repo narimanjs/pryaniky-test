@@ -14,20 +14,43 @@ import { HOST } from "../config";
 interface LoginProps {
   onLogin: (token: string, username: string) => void;
 }
+
 const Login: React.FC<LoginProps> = ({ onLogin }) => {
   const [username, setUsername] = useState<string>("");
-  const [password, setPassword] = useState<string>("password");
+  const [password, setPassword] = useState<string>("");
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
+  const [loginAttempted, setLoginAttempted] = useState<boolean>(false);
 
+  // Валидация логина
   const validateUsername = (username: string) => {
-    const regex = /^user\d+$/; // Регулярное выражение для проверки формата user{N}
+    const regex = /^user\d+$/;
     return regex.test(username);
   };
 
+  const validatePassword = (password: string) => {
+    if (password.length < 6) {
+      return "Пароль должен содержать минимум 6 символов";
+    }
+    if (password !== "password") {
+      return "Неверный пароль. Введите 'password'.";
+    }
+    return null;
+  };
+
   const handleLogin = async () => {
+    setLoginAttempted(true);
+
+    // Проверка логина
     if (!validateUsername(username)) {
       setError("Логин должен быть в формате user{N}, например user1");
+      return;
+    }
+
+    // Проверка пароля
+    const passwordError = validatePassword(password);
+    if (passwordError) {
+      setError(passwordError);
       return;
     }
 
@@ -82,17 +105,23 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
             onChange={e => setUsername(e.target.value)}
             fullWidth
             margin='normal'
-            error={!!error}
-            helperText={error && "Логин должен быть в формате user{N}"}
+            error={!!error && !validateUsername(username)}
+            helperText={
+              error && !validateUsername(username)
+                ? "Логин должен быть в формате user{N}"
+                : ""
+            }
           />
           <TextField
             label='Password'
             variant='outlined'
             value={password}
             type='password'
+            onChange={e => setPassword(e.target.value)}
             fullWidth
             margin='normal'
-            disabled
+            error={loginAttempted && !!validatePassword(password)}
+            helperText={loginAttempted && validatePassword(password)}
           />
           {error && <Typography color='error'>{error}</Typography>}
           <Button
