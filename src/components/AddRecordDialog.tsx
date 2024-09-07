@@ -70,7 +70,7 @@ const AddRecordDialog: React.FC<AddRecordDialogProps> = ({
         { headers: { "x-auth": token } }
       );
       onRecordAdded();
-      handleClose(); // Закрыть модальное окно после успешного добавления
+      handleClose();
     } catch (err) {
       setError("Ошибка при добавлении записи. Попробуйте еще раз.");
       console.error("Ошибка при добавлении записи:", err);
@@ -88,7 +88,7 @@ const AddRecordDialog: React.FC<AddRecordDialogProps> = ({
       <DialogContent>
         <TextField
           label='Company Signature Date'
-          type='datetime-local' // Изменено на datetime-local для выбора даты и времени
+          type='datetime-local'
           name='companySigDate'
           value={formData.companySigDate}
           onChange={handleChange}
@@ -138,7 +138,7 @@ const AddRecordDialog: React.FC<AddRecordDialogProps> = ({
         />
         <TextField
           label='Employee Signature Date'
-          type='datetime-local' // Изменено на datetime-local для выбора даты и времени
+          type='datetime-local'
           name='employeeSigDate'
           value={formData.employeeSigDate}
           onChange={handleChange}
@@ -177,7 +177,16 @@ const AddRecordDialog: React.FC<AddRecordDialogProps> = ({
           color='primary'
           disabled={loading}
         >
-          {loading ? <CircularProgress size={24} /> : "Добавить"}
+          {loading ? (
+            <CircularProgress
+              size={24}
+              sx={{
+                color: "primary.main",
+              }}
+            />
+          ) : (
+            "Добавить"
+          )}
         </Button>
       </DialogActions>
     </Dialog>

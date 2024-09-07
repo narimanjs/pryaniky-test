@@ -103,7 +103,16 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
             fullWidth
             sx={{ mt: 2 }}
           >
-            {loading ? <CircularProgress size={24} /> : "Войти"}
+            {loading ? (
+              <CircularProgress
+                size={24}
+                sx={{
+                  color: "primary.main",
+                }}
+              />
+            ) : (
+              "Войти"
+            )}
           </Button>
         </Box>
       </Paper>

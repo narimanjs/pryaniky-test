@@ -173,7 +173,19 @@ const DataTable = ({ token }: { token: string }) => {
       className='ag-theme-alpine'
       style={{ height: 500, width: "100%" }}
     >
-      {loading && <CircularProgress />}
+      {loading && (
+        <Box
+          display='flex'
+          justifyContent='center'
+          alignItems='center'
+          height='100%'
+        >
+          <CircularProgress
+            size={60}
+            thickness={4.5}
+          />
+        </Box>
+      )}
       {error && <p>{error}</p>}
       {!loading && !error && (
         <>

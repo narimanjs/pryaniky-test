@@ -18,17 +18,6 @@ const pulse = keyframes`
       box-shadow: 0 0 0 0 rgba(0, 255, 255, 0);
   }
 `;
-const rotateAnimation = keyframes`
-  0% {
-    transform: rotate(0deg);
-  }
-  50% {
-    transform: rotate(360deg);
-  }
-  100% {
-    transform: rotate(0deg);
-  }
-`;
 
 const UserInfo: React.FC<UserInfoProps> = ({ username, onLogout }) => {
   return (
@@ -51,7 +40,7 @@ const UserInfo: React.FC<UserInfoProps> = ({ username, onLogout }) => {
             mr: 2,
             width: 30,
             height: 30,
-            animation: `${pulse} 2s infinite`,
+            animation: `${pulse} 4s infinite`,
           }}
         >
           <AccountCircleIcon fontSize='small' />
