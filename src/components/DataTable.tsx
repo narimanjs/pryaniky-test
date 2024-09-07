@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect } from "react";
 import { Button, Box, CircularProgress } from "@mui/material";
 import { Add, Delete, Edit } from "@mui/icons-material";
 import axios from "axios";
@@ -8,7 +8,7 @@ import EditRecordDialog from "./EditRecordDialog";
 import ConfirmDeleteDialog from "./ConfirmDeleteDialog";
 import CustomSnackbar from "./CustomSnackbar";
 import { AgGridReact } from "ag-grid-react";
-import { ColDef, GridApi } from "ag-grid-community";
+import { ColDef } from "ag-grid-community";
 import "ag-grid-community/styles/ag-grid.css";
 import "ag-grid-community/styles/ag-theme-alpine.css";
 
@@ -36,33 +36,70 @@ const DataTable = ({ token }: { token: string }) => {
   const [snackbarOpen, setSnackbarOpen] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState("");
 
-  const gridRef = useRef<AgGridReact>(null);
-  const [gridApi, setGridApi] = useState<GridApi | null>(null); // Храним ссылку на Grid API
-
   const [columnDefs] = useState<ColDef[]>([
     {
       field: "companySigDate",
       headerName: "Company Signature Date",
       width: 200,
+      filter: "agDateColumnFilter",
+      wrapHeaderText: true,
+      autoHeaderHeight: true,
     },
     {
       field: "companySignatureName",
       headerName: "Company Signature Name",
       width: 200,
+      filter: true,
+      wrapHeaderText: true,
+      autoHeaderHeight: true,
     },
-    { field: "documentName", headerName: "Document Name", width: 150 },
-    { field: "documentStatus", headerName: "Document Status", width: 150 },
-    { field: "documentType", headerName: "Document Type", width: 200 },
-    { field: "employeeNumber", headerName: "Employee Number", width: 150 },
+    {
+      field: "documentName",
+      headerName: "Document Name",
+      width: 150,
+      filter: true,
+      wrapHeaderText: true,
+      autoHeaderHeight: true,
+    },
+    {
+      field: "documentStatus",
+      headerName: "Document Status",
+      width: 150,
+      filter: true,
+      wrapHeaderText: true,
+      autoHeaderHeight: true,
+    },
+    {
+      field: "documentType",
+      headerName: "Document Type",
+      width: 200,
+      filter: true,
+      wrapHeaderText: true,
+      autoHeaderHeight: true,
+    },
+    {
+      field: "employeeNumber",
+      headerName: "Employee Number",
+      width: 130,
+      filter: true,
+      wrapHeaderText: true,
+      autoHeaderHeight: true,
+    },
     {
       field: "employeeSigDate",
       headerName: "Employee Signature Date",
       width: 200,
+      filter: "agDateColumnFilter",
+      wrapHeaderText: true,
+      autoHeaderHeight: true,
     },
     {
       field: "employeeSignatureName",
       headerName: "Employee Signature Name",
       width: 150,
+      filter: true,
+      wrapHeaderText: true,
+      autoHeaderHeight: true,
     },
   ]);
 
@@ -124,47 +161,17 @@ const DataTable = ({ token }: { token: string }) => {
     setSnackbarMessage("Запись обновлена успешно");
     setSnackbarOpen(true);
     fetchData();
+    setSelectedRecord(null); // Сброс выбранной строки после обновления
   };
 
   const handleCloseSnackbar = () => {
     setSnackbarOpen(false);
   };
 
-  const handleKeyDown = (event: React.KeyboardEvent) => {
-    if (!gridApi) return;
-
-    const selectedNodes = gridApi.getSelectedNodes();
-    const selectedIndex =
-      selectedNodes.length > 0 ? selectedNodes[0].rowIndex : null;
-
-    if (selectedIndex !== null) {
-      // Проверка на null
-      if (event.key === "ArrowDown") {
-        const nextIndex = selectedIndex + 1;
-        gridApi.setFocusedCell(nextIndex, "companySigDate");
-        gridApi.getRowNode(`${nextIndex}`)?.setSelected(true);
-      } else if (event.key === "ArrowUp") {
-        const prevIndex = Math.max(0, selectedIndex - 1);
-        gridApi.setFocusedCell(prevIndex, "companySigDate");
-        gridApi.getRowNode(`${prevIndex}`)?.setSelected(true);
-      } else if (event.key === "Escape") {
-        gridApi.deselectAll();
-        setSelectedRecord(null);
-      }
-    } else {
-      if (event.key === "ArrowDown") {
-        gridApi.setFocusedCell(0, "companySigDate");
-        gridApi.getRowNode("0")?.setSelected(true);
-      }
-    }
-  };
-
   return (
     <div
       className='ag-theme-alpine'
       style={{ height: 500, width: "100%" }}
-      onKeyDown={handleKeyDown}
-      tabIndex={0}
     >
       {loading && <CircularProgress />}
       {error && <p>{error}</p>}
@@ -184,7 +191,7 @@ const DataTable = ({ token }: { token: string }) => {
               variant='contained'
               color='info'
               onClick={() => setIsEditDialogOpen(true)}
-              disabled={!selectedRecord}
+              disabled={!selectedRecord} // Кнопка неактивна, если не выбрана запись
               sx={{ mr: 1 }}
               startIcon={<Edit />}
             >
@@ -194,7 +201,7 @@ const DataTable = ({ token }: { token: string }) => {
               variant='contained'
               color='error'
               onClick={handleOpenDeleteDialog}
-              disabled={!selectedRecord}
+              disabled={!selectedRecord} // Кнопка неактивна, если не выбрана запись
               startIcon={<Delete />}
             >
               Удалить
@@ -202,11 +209,9 @@ const DataTable = ({ token }: { token: string }) => {
           </Box>
 
           <AgGridReact
-            ref={gridRef}
             rowData={data}
             columnDefs={columnDefs}
             onRowClicked={handleRowClick}
-            onGridReady={params => setGridApi(params.api)}
             rowSelection='single'
             domLayout='autoHeight'
           />

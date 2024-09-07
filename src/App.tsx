@@ -85,7 +85,7 @@ const App = () => {
             </Button>
             <Button
               onClick={handleLogout}
-              color='secondary'
+              color='error'
               autoFocus
             >
               Выйти

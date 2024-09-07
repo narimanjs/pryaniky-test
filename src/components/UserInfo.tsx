@@ -1,4 +1,4 @@
-import { Box, Typography, Button, Avatar } from "@mui/material";
+import { Box, Typography, Button, Avatar, keyframes } from "@mui/material";
 import LogoutIcon from "@mui/icons-material/Logout";
 import AccountCircleIcon from "@mui/icons-material/AccountCircle";
 
@@ -6,6 +6,29 @@ interface UserInfoProps {
   username: string;
   onLogout: () => void;
 }
+
+const pulse = keyframes`
+  0% {
+    box-shadow: 0 0 0 0 rgba(0, 255, 255, 0.4);
+  }
+  70% {
+      box-shadow: 0 0 0 20px rgba(0, 255, 255, 0);
+  }
+  100% {
+      box-shadow: 0 0 0 0 rgba(0, 255, 255, 0);
+  }
+`;
+const rotateAnimation = keyframes`
+  0% {
+    transform: rotate(0deg);
+  }
+  50% {
+    transform: rotate(360deg);
+  }
+  100% {
+    transform: rotate(0deg);
+  }
+`;
 
 const UserInfo: React.FC<UserInfoProps> = ({ username, onLogout }) => {
   return (
@@ -22,7 +45,15 @@ const UserInfo: React.FC<UserInfoProps> = ({ username, onLogout }) => {
         alignItems='center'
         sx={{ mb: 2 }}
       >
-        <Avatar sx={{ bgcolor: "primary.main", mr: 2, width: 30, height: 30 }}>
+        <Avatar
+          sx={{
+            bgcolor: "primary.main",
+            mr: 2,
+            width: 30,
+            height: 30,
+            animation: `${pulse} 2s infinite`,
+          }}
+        >
           <AccountCircleIcon fontSize='small' />
         </Avatar>
 

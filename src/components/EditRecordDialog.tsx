@@ -114,7 +114,7 @@ const EditRecordDialog: React.FC<EditRecordDialogProps> = ({
       <DialogContent>
         <TextField
           label='Company Signature Date'
-          type='datetime-local' // Изменено на datetime-local для выбора даты и времени
+          type='datetime-local'
           name='companySigDate'
           value={formData.companySigDate}
           onChange={handleChange}
@@ -164,7 +164,7 @@ const EditRecordDialog: React.FC<EditRecordDialogProps> = ({
         />
         <TextField
           label='Employee Signature Date'
-          type='datetime-local' // Изменено на datetime-local для выбора даты и времени
+          type='datetime-local'
           name='employeeSigDate'
           value={formData.employeeSigDate}
           onChange={handleChange}
@@ -184,7 +184,7 @@ const EditRecordDialog: React.FC<EditRecordDialogProps> = ({
       <DialogActions>
         <Button
           onClick={handleClose}
-          color='primary'
+          color='error'
         >
           Отмена
         </Button>
