@@ -1,4 +1,4 @@
-import { Box, Typography, Button, Avatar, keyframes } from "@mui/material";
+import { Box, Typography, Button, Avatar } from "@mui/material";
 import LogoutIcon from "@mui/icons-material/Logout";
 import AccountCircleIcon from "@mui/icons-material/AccountCircle";
 
@@ -7,48 +7,55 @@ interface UserInfoProps {
   onLogout: () => void;
 }
 
-const pulse = keyframes`
-  0% {
-    box-shadow: 0 0 0 0 rgba(0, 255, 255, 0.4);
-  }
-  70% {
-      box-shadow: 0 0 0 20px rgba(0, 255, 255, 0);
-  }
-  100% {
-      box-shadow: 0 0 0 0 rgba(0, 255, 255, 0);
-  }
-`;
-
 const UserInfo: React.FC<UserInfoProps> = ({ username, onLogout }) => {
   return (
     <Box
       display='flex'
       flexDirection='column'
-      alignItems='flex-end'
-      justifyContent='flex-end'
-      sx={{ mb: 3 }}
+      alignItems='center'
+      justifyContent='center'
+      sx={{
+        mb: 3,
+        p: 2,
+        border: "1px solid rgba(0, 255, 255, 0.6)",
+        borderRadius: "8px",
+        maxWidth: 250,
+      }}
     >
       <Box
         display='flex'
-        flexDirection='row'
+        flexDirection='column'
         alignItems='center'
-        sx={{ mb: 2 }}
+        sx={{ mb: 1 }}
       >
         <Avatar
           sx={{
             bgcolor: "primary.main",
-            mr: 2,
-            width: 30,
-            height: 30,
-            animation: `${pulse} 4s infinite`,
+            mr: 1,
+            width: 50,
+            height: 50,
+            border: "3px solid rgba(0, 255, 255, 0.8)",
+            boxShadow: "0 4px 15px rgba(0, 255, 255, 0.6)",
+            position: "relative",
+            "&::after": {
+              content: '""',
+              position: "absolute",
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              borderRadius: "50%",
+              border: "2px solid rgba(0, 255, 255, 0.4)",
+            },
           }}
         >
-          <AccountCircleIcon fontSize='small' />
+          <AccountCircleIcon fontSize='medium' />
         </Avatar>
 
         <Typography
           variant='h5'
           fontWeight='bold'
+          textAlign='center'
         >
           {username}
         </Typography>
@@ -59,7 +66,11 @@ const UserInfo: React.FC<UserInfoProps> = ({ username, onLogout }) => {
         color='error'
         onClick={onLogout}
         startIcon={<LogoutIcon />}
-        sx={{ fontSize: "1rem", width: "132px" }}
+        sx={{
+          fontSize: "1rem",
+          width: "132px",
+          mt: 2,
+        }}
       >
         Выйти
       </Button>
