@@ -1,15 +1,15 @@
 {
   "files": {
     "main.css": "/pryaniky-test/static/css/main.03756060.css",
-    "main.js": "/pryaniky-test/static/js/main.ab930684.js",
+    "main.js": "/pryaniky-test/static/js/main.d84aabbf.js",
     "static/js/453.b5b1c249.chunk.js": "/pryaniky-test/static/js/453.b5b1c249.chunk.js",
     "index.html": "/pryaniky-test/index.html",
     "main.03756060.css.map": "/pryaniky-test/static/css/main.03756060.css.map",
-    "main.ab930684.js.map": "/pryaniky-test/static/js/main.ab930684.js.map",
+    "main.d84aabbf.js.map": "/pryaniky-test/static/js/main.d84aabbf.js.map",
     "453.b5b1c249.chunk.js.map": "/pryaniky-test/static/js/453.b5b1c249.chunk.js.map"
   },
   "entrypoints": [
     "static/css/main.03756060.css",
-    "static/js/main.ab930684.js"
+    "static/js/main.d84aabbf.js"
   ]
 }
