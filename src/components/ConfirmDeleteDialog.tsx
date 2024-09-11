@@ -41,7 +41,7 @@ const ConfirmDeleteDialog: React.FC<ConfirmDeleteDialogProps> = ({
         </Button>
         <Button
           onClick={handleConfirm}
-          color='secondary'
+          color='error'
           autoFocus
         >
           Удалить
